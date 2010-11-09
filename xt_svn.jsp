@@ -17,7 +17,6 @@ import java.sql.PreparedStatement;
 import oracle.sql.*;
 import oracle.jdbc.driver.OracleDriver;
 
-//import java.util.concurrent.TimeoutException;
 /* Main class */
 public class XT_SVN
 {
@@ -79,93 +78,6 @@ public class XT_SVN
              conn.close();
          }
          return ret;
-  }
-/**
- * Function shellExec
- * @param String shell command
- * @return String
- */
-  public static java.lang.String shellExec (String command)
-    throws SQLException 
-  {
-      StringBuffer result;
-      OutputStream stdin = null;
-      InputStream stderr = null;
-      InputStream stdout = null;
-      String line;
-      try{
-          result = new StringBuffer();
-          Process process = Runtime.getRuntime().exec(command);
-          stdin = process.getOutputStream ();
-          stderr = process.getErrorStream ();
-          stdout = process.getInputStream ();
-          
-          BufferedReader brCleanUp = 
-                         new BufferedReader (
-                             new InputStreamReader (stdout,"UTF-8"));
-          while ((line = brCleanUp.readLine ()) != null) {
-            result.append(line).append("\n");
-          }
-          brCleanUp.close();
-          
-          brCleanUp = 
-            new BufferedReader (new InputStreamReader (stderr,"UTF-8"));
-          while ((line = brCleanUp.readLine ()) != null) {
-            result.append("STDERR:\t").append(line).append("\n");
-          }
-          brCleanUp.close();
-          // add timeout 
-            Worker worker = new Worker(process);
-            worker.start();
-            try {
-              worker.join(5000);
-              if (worker.exit == 0)
-                return result.toString();
-              else
-                throw new InterruptedException("Timeout");
-            } catch(InterruptedException ex) {
-              worker.interrupt();
-              Thread.currentThread().interrupt();
-              throw ex;
-            } finally {
-              process.destroy();
-            }
-          //end time
-      }catch(Exception e){
-           throw new SQLException(e.getMessage());
-      }
-  }
-/**
- * Function shellExec
- * @param String shell command
- * @return String
- */
-  public static oracle.sql.ARRAY SQLshellExec (String command)
-    throws SQLException 
-  {
-    String shellResult = shellExec(command);
-    Connection conn = new OracleDriver().defaultConnection();         
-         ArrayDescriptor descriptor =
-            ArrayDescriptor.createDescriptor("VARCHAR2_TABLE", conn );
-    oracle.sql.ARRAY outArray = new oracle.sql.ARRAY(descriptor,conn,shellResult.split("\n"));
-    return outArray;
-  }
-/**
- * Timer
- */
-  private static class Worker extends Thread {
-    private final Process process;
-    private int exit;
-    private Worker(Process process) {
-      this.process = process;
-    }
-    public void run() {
-      try { 
-        exit = process.waitFor();
-      } catch (InterruptedException ignore) {
-        return;
-      }
-    }  
   }
 }
 /
