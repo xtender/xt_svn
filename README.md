@@ -53,6 +53,7 @@ Like previous function, but returns collection of objects.
 Checkout from svn into pPath.
 
     function svn_commit(   pPath varchar2 default REP_PATH,
+                         pComment varchar2 default '',
                          pUser varchar2 default null,
                          pPass varchar2 default null )
      return varchar2_table;
@@ -68,8 +69,21 @@ Executes "svn "||command
 Examples
 -------
 
+### DML:
+
+    select * from table(xt_svn.svn_statuses())
+
 ### Pl/SQL block:
 
+    --Exporting sources
+    declare 
+      i number;
+    begin
+      i:=xt_svn.export(pOwner => 'XTENDER');
+      dbms_output.put_line('Exported count = '||i);
+    end;
+
+    -- Getting statuses
     declare
       output varchar2_table;
     begin
@@ -78,7 +92,4 @@ Examples
         dbms_output.put_line(output(c));
       end loop;
     end;
-
-### DML:
-
-    select * from table(xt_svn.svn_statuses())
+    
