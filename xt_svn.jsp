@@ -31,17 +31,18 @@ public class XT_SVN
   ) throws SQLException 
   {
          Connection conn = null;
+         String owner="";
          String typ="";
          String name="";
-         String sTyp,sName,sText;
+         String sOwner,sTyp,sName,sText;
          FileWriter fwr = null;
          int ret = 0;
          try{
              conn = new OracleDriver().defaultConnection();
              PreparedStatement stmt = conn.prepareStatement
-                                ("select s.type,s.name,s.text"
+                                ("select s.owner, s.type,s.name,s.text"
                                  +" from all_source s"
-                                 +" where owner like ?"
+                                 +" where s.owner like ?"
                                  +" and s.type like ?"
                                  +" and s.name like ?"
                                  +" order by s.type,s.name,s.line");
@@ -52,19 +53,23 @@ public class XT_SVN
              ResultSet rset = stmt.executeQuery();
 
              while (rset.next()) {
-                 sTyp  = rset.getString(1);
-                 sName = rset.getString(2);
-                 sText = rset.getString(3);
+                 sOwner= rset.getString(1);
+                 sTyp  = rset.getString(2);
+                 sName = rset.getString(3);
+                 sText = rset.getString(4);
 
-                 if (!typ.equals(sTyp) || !name.equals(sName)){
+                 if (!owner.equals(sOwner) || !typ.equals(sTyp) || !name.equals(sName)){
+                    owner = sOwner;
                     typ = sTyp;
                     name = sName;
                     ret++;
                     if(fwr!=null)
                        fwr.close();
-                    if (! (new File(pPath+'/'+typ)).exists() )
-                       (new File(pPath+'/'+typ)).mkdir();
-                    fwr = new FileWriter(new File(pPath+'/'+typ,name+".sql"));
+                    if (! (new File(pPath+'/'+owner)).exists() )
+                       (new File(pPath+'/'+owner)).mkdir();
+                    if (! (new File(pPath+'/'+owner+'/'+typ)).exists() )
+                       (new File(pPath+'/'+owner+'/'+typ)).mkdir();
+                    fwr = new FileWriter(new File(pPath+'/'+owner+'/'+typ,name+".sql"));
                  }
                  fwr.write(sText);
              }
