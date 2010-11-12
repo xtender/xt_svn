@@ -22,6 +22,7 @@ create or replace package XT_SVN is
    return varchar2_table;
 
   function svn_commit(   pPath varchar2 default REP_PATH,
+                         pComment varchar2 default '',
                          pUser varchar2 default null,
                          pPass varchar2 default null )
    return varchar2_table;
@@ -91,6 +92,7 @@ create or replace package body XT_SVN is
     end svn_checkout;
     
   function svn_commit(   pPath varchar2 default REP_PATH,
+                         pComment varchar2 default '',
                          pUser varchar2 default null,
                          pPass varchar2 default null)
    return varchar2_table is
@@ -100,6 +102,7 @@ create or replace package body XT_SVN is
                         ||' '|| pPath
                         ||' '|| case when pUser is not null then '--username '||pUser end
                         ||' '|| case when pPass is not null then '--password '||pPass end
+                        ||' -m "' || pComment || '"'
                         ,30000
       );
     end svn_commit;
